@@ -1,17 +1,15 @@
-import sns = require('@aws-cdk/aws-sns');
-import sqs = require('@aws-cdk/aws-sqs');
-import cdk = require('@aws-cdk/cdk');
+import cdk = require("@aws-cdk/cdk");
+import lambda = require("@aws-cdk/aws-lambda");
 
 export class RandomQuoteStack extends cdk.Stack {
+  public readonly randomQuoteLambda: lambda.Function;
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const queue = new sqs.Queue(this, 'RandomQuoteQueue', {
-      visibilityTimeoutSec: 300
+    this.randomQuoteLambda = new lambda.Function(this, "randomQuote", {
+      runtime: lambda.Runtime.NodeJS810,
+      handler: "random_quote.handler",
+      code: lambda.Code.asset("lambda")
     });
-
-    const topic = new sns.Topic(this, 'RandomQuoteTopic');
-
-    topic.subscribeQueue(queue);
   }
 }

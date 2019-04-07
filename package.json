@@ -15,8 +15,8 @@
     "aws-cdk": "^0.22.0"
   },
   "dependencies": {
-    "@aws-cdk/aws-sns": "^0.22.0",
-    "@aws-cdk/aws-sqs": "^0.22.0",
+    "@aws-cdk/aws-apigateway": "^0.22.0",
+    "@aws-cdk/aws-lambda": "^0.22.0",
     "@aws-cdk/cdk": "^0.22.0"
   }
 }
