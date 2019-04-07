@@ -1,0 +1,22 @@
+{
+  "name": "random_quote",
+  "version": "0.1.0",
+  "bin": {
+    "random_quote": "bin/random_quote.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "@types/node": "^8.9.4",
+    "typescript": "^3.1.2",
+    "aws-cdk": "^0.22.0"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-sns": "^0.22.0",
+    "@aws-cdk/aws-sqs": "^0.22.0",
+    "@aws-cdk/cdk": "^0.22.0"
+  }
+}
