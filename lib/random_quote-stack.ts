@@ -9,28 +9,27 @@ export class RandomQuoteStack extends cdk.Stack {
   constructor(scope: cdk.App, name: string, props?: cdk.StackProps) {
     super(scope, name, props);
 
+    // Creating Lambda
     this.randomQuoteLambda = new lambda.Function(this, "randomQuote", {
       runtime: lambda.Runtime.NodeJS810,
       handler: "random_quote.handler",
       code: lambda.Code.asset("lambda")
     });
 
-    const cognitoUserPool = new CognitoUserPool(this, "random_quote_user_pool");
-
+    // Creating API Gateway of type RestAPI
     this.randomQuoteApi = new api.LambdaRestApi(this, "randomQuoteApi", {
       handler: this.randomQuoteLambda,
       proxy: false
     });
 
-    const cognitoAuthorizer = new api.CfnAuthorizer(this, "cognito_authorizer", {
-      name: "cognito_authorizer",
-      restApiId: this.randomQuoteApi.restApiId,
-      identitySource: "method.request.header.Authorization",
-      providerArns: [cognitoUserPool.userPool.userPoolArn],
-      type: "COGNITO_USER_POOLS"
-    });
-
+    // Integration Lambda with API Gateway
     const randomQuoteLambdaIntegration = new api.LambdaIntegration(this.randomQuoteLambda);
+
+    // Creating cognito user pool and its authorizer
+    const cognitoUserPool = new CognitoUserPool(this, "random_quote_user_pool");
+    const cognitoAuthorizer = cognitoUserPool.createAuthorizer(this, this.randomQuoteApi.restApiId);
+
+    // Creating API methods with cognito authorizer
     const quoteApiRes = this.randomQuoteApi.root.addResource("quote");
     quoteApiRes.addMethod("GET", randomQuoteLambdaIntegration, {
       authorizationType: api.AuthorizationType.Cognito,
@@ -43,10 +42,16 @@ export class RandomQuoteStack extends cdk.Stack {
       apiKeyRequired: false
     });
 
+    // Enabling cors to both methods and root
     this.addCorsOptions(this.randomQuoteApi.root);
     this.addCorsOptions(quoteApiRes);
   }
 
+  /**
+   * Custom method which will modify the API Gateway resource and enable CORS in it.
+   * Source: https://github.com/awslabs/aws-cdk/issues/906#issuecomment-480554481
+   * @param apiResource
+   */
   addCorsOptions(apiResource: api.IRestApiResource) {
     apiResource.addMethod(
       "OPTIONS",
